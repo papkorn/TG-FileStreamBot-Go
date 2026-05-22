@@ -36,12 +36,6 @@ func getStreamRoute(ctx *gin.Context) {
 		return
 	}
 
-	authHash := ctx.Query("hash")
-	if authHash == "" {
-		http.Error(w, "missing hash param", http.StatusBadRequest)
-		return
-	}
-
 	worker := bot.GetNextWorker()
 
 	file, err := utils.TimeFuncWithResult(log, "FileFromMessage", func() (*types.File, error) {
@@ -49,17 +43,6 @@ func getStreamRoute(ctx *gin.Context) {
 	})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	expectedHash := utils.PackFile(
-		file.FileName,
-		file.FileSize,
-		file.MimeType,
-		file.ID,
-	)
-	if !utils.CheckHash(authHash, expectedHash) {
-		http.Error(w, "invalid hash", http.StatusBadRequest)
 		return
 	}
 
